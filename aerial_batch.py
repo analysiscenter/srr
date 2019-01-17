@@ -6,12 +6,20 @@ import PIL
 import batchflow as bf
 from batchflow import ImagesBatch, action, inbatch_parallel
 
-def get_origs(mask, crop_shape=(128,128), seed=None):
+def get_origs(mask, crop_shape=(128,128), p=0.5, seed=None):
     background_shape = mask.size
     np.random.seed(seed)
-
-    origin = (np.random.randint(background_shape[0]-crop_shape[0]+1),
-              np.random.randint(background_shape[1]-crop_shape[1]+1))
+    arr_mask = np.array(mask)
+    if np.random.uniform()>=p and np.any(arr_mask):
+        good_points = np.where(arr_mask>0)
+        center_index = np.random.randint(0, len(good_points[0]))
+        origin = [good_points[0][center_index]-int(np.ceil(crop_shape[0]/2)), 
+                  good_points[1][center_index]-int(np.ceil(crop_shape[1]/2))]
+        origin[0] = min(max(0, origin[0]), background_shape[0] - int(np.floor(crop_shape[0] / 2)))
+        origin[1] = min(max(0, origin[1]), background_shape[1] - int(np.floor(crop_shape[1] / 2)))
+    else:
+        origin = (np.random.randint(background_shape[0]-crop_shape[0]+1),
+                  np.random.randint(background_shape[1]-crop_shape[1]+1))
     return origin[::-1]
 
 class AerialBatch(ImagesBatch):

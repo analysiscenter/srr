@@ -15,7 +15,8 @@ def transform_mask_to_class_numbers(fname):
     """
     """
     mask = np.array(Image.open(fname))
-    mask = mask // 255 # to 0 / 1 values
+    mask = mask // 128 # to 0 / 1 values
+    # use 128 as suggested in https://arxiv.org/pdf/1806.03510.pdf
     base = 2 ** np.arange(3)[::-1] # binary base
     mask = (mask * base).sum(axis=-1).astype(np.uint8)
     Image.fromarray(mask).save(fname)
