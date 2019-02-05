@@ -7,6 +7,8 @@ import batchflow as bf
 from batchflow import ImagesBatch, action, inbatch_parallel
 
 def get_origs(mask, crop_shape=(128,128), p=0.5, seed=None):
+    """
+    """
     background_shape = mask.size
     np.random.seed(seed)
     arr_mask = np.array(mask)
@@ -21,6 +23,30 @@ def get_origs(mask, crop_shape=(128,128), p=0.5, seed=None):
         origin = (np.random.randint(background_shape[0]-crop_shape[0]+1),
                   np.random.randint(background_shape[1]-crop_shape[1]+1))
     return origin[::-1]
+
+def make_mask(mask, classes=(1, 2)):
+    """
+    Notes
+    -----
+    
+    Label | Class
+    *************
+    0     | Unknown
+    1     | Water
+    2     | Forest land
+    3     | Urban land
+    5     | Rangeland
+    6     | Agriculture land
+    7     | Barren land
+    """
+    
+    mask = np.squeeze(mask, -1)
+    new_mask = np.zeros((*mask.shape, len(classes)) + 1)
+    
+    for i, class in enumerate(classes):
+        new_mask[:, :, i+1] = mask == class
+    new_mask[:, :, 0] = np.sum(new_mask, axis=-1) == 0
+    return new_mask.astype(np.uint8)
 
 class AerialBatch(ImagesBatch):
     """
