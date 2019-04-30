@@ -3,26 +3,8 @@
 import numpy as np
 import PIL
 
+import batchflow as bf
 from batchflow import ImagesBatch, action, inbatch_parallel
-
-def get_origs(mask, crop_shape=(128, 128), p=0.5, seed=None):
-    """Function that find non-zero mask points, ramdomly choses one
-    and returns coordinated of the crop with center at that point.
-    """
-    background_shape = mask.size
-    np.random.seed(seed)
-    arr_mask = np.array(mask)
-    if np.random.uniform() >= p and np.any(arr_mask):
-        good_points = np.where(arr_mask > 0)
-        center_index = np.random.randint(0, len(good_points[0]))
-        origin = [good_points[0][center_index]-int(np.ceil(crop_shape[0]/2)),
-                  good_points[1][center_index]-int(np.ceil(crop_shape[1]/2))]
-        origin[0] = min(max(0, origin[0]), background_shape[0] - int(np.floor(crop_shape[0] / 2)))
-        origin[1] = min(max(0, origin[1]), background_shape[1] - int(np.floor(crop_shape[1] / 2)))
-    else:
-        origin = (np.random.randint(background_shape[0]-crop_shape[0]+1),
-                  np.random.randint(background_shape[1]-crop_shape[1]+1))
-    return origin[::-1]
 
 class AerialBatch(ImagesBatch):
     """Class for reading and processing of aerial images.
@@ -43,6 +25,7 @@ class AerialBatch(ImagesBatch):
         fmt : str
             Format of an image.
         """
+        _ = dst
         path = self._make_path(ix, src).split('_')[0] + '_mask.png'
         return PIL.Image.open(path)
 
@@ -67,3 +50,36 @@ class AerialBatch(ImagesBatch):
         if fmt == 'mask':
             return self._load_mask(src, dst=dst)
         return super().load(src=src, fmt=fmt, dst=dst, *args, **kwargs)
+
+    @action
+    def _make_crops_(self, image, size):
+        """Crop patches from original image and combine them into array.
+        """
+        crops = []
+        imsize = image.size
+        x_times = np.ceil(imsize[0] / size[0]).astype(int)
+        y_times = np.ceil(imsize[1] / size[1]).astype(int)
+
+        for y in range(y_times):
+            for x in range(x_times):
+                origin = (x*size[0], y*size[1])
+                right_bottom = tuple(map(sum, zip(origin, size)))
+                crops.append(image.crop((*origin, *right_bottom)))
+
+        return np.array(crops + [None])[:-1]
+
+    @action
+    def unstack_crops(self):
+        """Split crops from one image into separate images within new batch.
+        """
+        images = np.array([crop for img in self.images for crop in img] + [None])[:-1]
+        index = bf.DatasetIndex(np.arange(len(images)))
+        batch = type(self)(index)
+        batch.images = images
+
+        masks = np.array([crop for img in self.masks for crop in img] + [None])[:-1]
+        batch.masks = masks
+
+        batch.orig_images = self.orig_images
+
+        return batch
