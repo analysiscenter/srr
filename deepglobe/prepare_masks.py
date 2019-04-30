@@ -7,12 +7,12 @@
 
 import os
 import argparse
-import numpy as np
 from multiprocessing import Pool
+import numpy as np
 from PIL import Image
 
 def transform_mask_to_class_numbers(fname):
-    """
+    """Transforms mask from 3-chanel binary encoding to flat mask.
     """
     mask = np.array(Image.open(fname))
     mask = mask // 128 # to 0 / 1 values
@@ -22,7 +22,8 @@ def transform_mask_to_class_numbers(fname):
     Image.fromarray(mask).save(fname)
 
 def main():
-    """
+    """Apply mask-transforming function in parallel to all files in 'png' format
+    in specified folder.
     """
     parser = argparse.ArgumentParser('')
     parser.add_argument('--path', dest='path', default=None,
@@ -30,17 +31,15 @@ def main():
     args = parser.parse_args()
     path = args.path
     if not path:
-         raise ValueError('You need to specify path to the files with `--path`.')
+        raise ValueError('You need to specify path to the files with `--path`.')
 
     names = os.listdir(path)
     mask_names = [os.path.join(path, name) for name in names if name.endswith('png')]
 
-
     pool = Pool(4)
+    pool.map(transform_mask_to_class_numbers, mask_names)
 
-    results = pool.map(transform_mask_to_class_numbers, mask_names)
-
-    #close the pool and wait for the work to finish 
+    #close the pool and wait for the work to finish
     pool.close()
     pool.join()
 
