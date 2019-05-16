@@ -32,8 +32,8 @@ def make_mask(mask, classes=(1, 2)):
     ----------
     mask : ndarray
         (x, y) or (x, y, 1) array with inters representing pixel classes.
-    classes: tuple of integers
-        Classes to be included in resulting mask.
+    classes: tuple of integers > 0
+        Classes to be included in resulting mask. Zero is reserved for background.
 
     Returns
     -------
@@ -53,14 +53,12 @@ def make_mask(mask, classes=(1, 2)):
     6     | Agriculture land
     7     | Barren land
     """
-
     mask = np.squeeze(mask, -1)
     new_mask = np.zeros((*mask.shape, len(classes) + 1))
 
     for i, label in enumerate(classes):
         new_mask[:, :, i+1] = mask == label
-    if 0 not in classes:
-        new_mask[:, :, 0] = np.sum(new_mask, axis=-1) == 0
+    new_mask[:, :, 0] = np.sum(new_mask, axis=-1) == 0
     return new_mask.astype(np.uint8)
 
 def gather_image(batch, preds, crop_shape):
