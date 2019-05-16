@@ -11,7 +11,7 @@ build:
     image_name: $DOCKER_ACC/$DOCKER_REPO
     image_tag: $TAG
   ci:
-    - find ./ -not -path "./batchflow/*" -iname "*.py" | xargs -r pylint -rn --rcfile pylintrc
+    - find ./ -not -path "./srr/batchflow/*" -iname "*.py" | xargs -r pylint -rn --rcfile pylintrc
 
 integrations:
   hub:
