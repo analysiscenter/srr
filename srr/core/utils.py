@@ -2,7 +2,7 @@
 
 import numpy as np
 import tensorflow as tf
-from ..batchflow.models.tf.losses import dice, softmax_cross_entropy
+from ..batchflow.batchflow.models.tf.losses import dice, softmax_cross_entropy
 
 
 def get_origs(mask, crop_shape=(128, 128), p=0.5, seed=None):
@@ -80,7 +80,7 @@ def ce_dice_loss(labels, logits, alpha=0.75, *args, **kwargs):
     """Weighted sum of BCE and DICE losses.
     """
     _ = args, kwargs
-    ce_loss = alpha * softmax_cross_entropy(labels=labels, logits=logits)
+    ce_loss = alpha * softmax_cross_entropy(labels=labels, logits=logits, loss_collection=None)
     dice_loss = (1-alpha) * dice(labels, logits, loss_collection=None)
     loss = ce_loss + dice_loss
     tf.losses.add_loss(loss)
