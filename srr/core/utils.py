@@ -26,6 +26,20 @@ def get_origs(mask, crop_shape=(128, 128), p=0.5, seed=None):
 
 def make_mask(mask, classes=(1, 2)):
     """
+    Prepare masks for the model.
+
+    Parameters
+    ----------
+    mask : ndarray
+        (x, y) or (x, y, 1) array with inters representing pixel classes.
+    classes: tuple of integers
+        Classes to be included in resulting mask.
+
+    Returns
+    -------
+    new_mask : ndarray
+        (x, y, len(classes)) array with one-hot mask.
+
     Notes
     -----
 
@@ -45,7 +59,7 @@ def make_mask(mask, classes=(1, 2)):
 
     for i, label in enumerate(classes):
         new_mask[:, :, i+1] = mask == label
-    if not 0 in classes:
+    if 0 not in classes:
         new_mask[:, :, 0] = np.sum(new_mask, axis=-1) == 0
     return new_mask.astype(np.uint8)
 
@@ -65,9 +79,10 @@ def gather_image(batch, preds, crop_shape):
 def ce_dice_loss(labels, logits, alpha=0.75, *args, **kwargs):
     """Weighted sum of BCE and DICE losses.
     """
-    ce_loss = alpha * tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits))
+    _ = args, kwargs
+    ce_loss = alpha * softmax_cross_entropy(labels=labels, logits=logits)
     dice_loss = (1-alpha) * dice(labels, logits, loss_collection=None)
-    loss = bce_loss + dice_loss
+    loss = ce_loss + dice_loss
     tf.losses.add_loss(loss)
-    
+
     return loss
