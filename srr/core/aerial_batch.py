@@ -4,7 +4,7 @@ import numpy as np
 import PIL
 
 from ..batchflow import ImagesBatch, DatasetIndex, action, inbatch_parallel
-from ..batchflow.batch_image import transform_actions
+from ..batchflow.batchflow.batch_image import transform_actions
 
 
 @transform_actions(prefix='_', suffix='_', wrapper='apply_transform')
