@@ -12,7 +12,7 @@ def get_origs(mask, crop_shape=(128, 128), p=0.5, seed=None):
     background_shape = mask.size
     np.random.seed(seed)
     arr_mask = np.array(mask)
-    if np.random.uniform() >= p and np.any(arr_mask):
+    if np.random.uniform() <= p and np.any(arr_mask):
         good_points = np.where(arr_mask > 0)
         center_index = np.random.randint(0, len(good_points[0]))
         origin = [good_points[0][center_index]-int(np.ceil(crop_shape[0]/2)),
