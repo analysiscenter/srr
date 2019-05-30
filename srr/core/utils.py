@@ -5,15 +5,16 @@ import tensorflow as tf
 from ..batchflow.batchflow.models.tf.losses import dice, softmax_cross_entropy
 
 
-def get_origs(mask, crop_shape=(128, 128), p=0.5, seed=None):
+def get_origs(mask, classes, crop_shape=(128, 128), p=0.5, seed=None):
     """Function that find non-zero mask points, ramdomly choses one
     and returns coordinated of the crop with center at that point.
     """
     background_shape = mask.size
     np.random.seed(seed)
     arr_mask = np.array(mask)
-    if np.random.uniform() <= p and np.any(arr_mask):
-        good_points = np.where(arr_mask > 0)
+    classes_in_mask = np.isin(arr_mask, classes)
+    if np.random.uniform() <= p and np.any(classes_in_mask):
+        good_points = np.where(classes_in_mask)
         center_index = np.random.randint(0, len(good_points[0]))
         origin = [good_points[0][center_index]-int(np.ceil(crop_shape[0]/2)),
                   good_points[1][center_index]-int(np.ceil(crop_shape[1]/2))]
@@ -24,7 +25,7 @@ def get_origs(mask, crop_shape=(128, 128), p=0.5, seed=None):
                   np.random.randint(background_shape[1]-crop_shape[1]+1))
     return origin[::-1]
 
-def make_mask(mask, classes=(1, 2)):
+def make_mask(mask, classes):
     """
     Prepare masks for the model.
 
@@ -70,9 +71,10 @@ def gather_image(batch, preds, crop_shape):
     """
     size = np.ceil(np.array(batch.orig_images[0].size) / crop_shape).astype(int)
     img = np.vstack([np.hstack(batch.images[i*size[0]:(i+1)*size[0]]) for i in range(size[1])])
+    mask = np.vstack([np.hstack(batch.masks[i*size[0]:(i+1)*size[0]]) for i in range(size[1])])
     pred = np.vstack([np.hstack(preds[i*size[0]:(i+1)*size[0]]) for i in range(size[1])])
 
-    return img, pred
+    return img, mask, pred
 
 def ce_dice_loss(labels, logits, alpha=0.75, *args, **kwargs):
     """Weighted sum of BCE and DICE losses.

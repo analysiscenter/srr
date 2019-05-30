@@ -83,5 +83,6 @@ class AerialBatch(ImagesBatch):
         batch.masks = masks
 
         batch.orig_images = self.orig_images
+        batch.orig_masks = self.orig_masks
 
         return batch
