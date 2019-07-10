@@ -5,16 +5,17 @@ import tensorflow as tf
 from ..batchflow.batchflow.models.tf.losses import dice, softmax_cross_entropy
 
 
-def get_origs(mask, classes, crop_shape=(128, 128), p=0.5, seed=None):
+def get_origs(mask, classes, crop_shape=(128, 128), proba=0.5, seed=None):
     """Function that find non-zero mask points, ramdomly choses one
     and returns coordinated of the crop with center at that point.
     """
     background_shape = mask.size
     np.random.seed(seed)
-    arr_mask = np.array(mask)
-    classes_in_mask = np.isin(arr_mask, classes)
-    if np.random.uniform() <= p and np.any(classes_in_mask):
-        good_points = np.where(classes_in_mask)
+
+    classes_in_mask = [val for count, val in mask.getcolors()]
+    if np.random.uniform() <= proba and np.any(np.isin(classes_in_mask, classes)):
+        arr_mask = np.array(mask)
+        good_points = np.where(np.isin(arr_mask, classes))
         center_index = np.random.randint(0, len(good_points[0]))
         origin = [good_points[0][center_index]-int(np.ceil(crop_shape[0]/2)),
                   good_points[1][center_index]-int(np.ceil(crop_shape[1]/2))]
@@ -34,27 +35,15 @@ def make_mask(mask, classes):
     mask : ndarray
         (x, y) or (x, y, 1) array with inters representing pixel classes.
     classes: tuple of integers > 0
-        Classes to be included in resulting mask. Zero is reserved for background.
+        Classes from source mask to be included in resulting mask. Zero is reserved for background.
 
     Returns
     -------
     new_mask : ndarray
         (x, y, len(classes)) array with one-hot mask.
-
-    Notes
-    -----
-
-    Label | Class
-    *************
-    0     | Unknown
-    1     | Water
-    2     | Forest land
-    3     | Urban land
-    5     | Rangeland
-    6     | Agriculture land
-    7     | Barren land
     """
-    mask = np.squeeze(mask, -1)
+    if mask.ndim == 3:
+        mask = np.squeeze(mask, -1)
     new_mask = np.zeros((*mask.shape, len(classes) + 1))
 
     for i, label in enumerate(classes):
