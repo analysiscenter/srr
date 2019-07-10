@@ -2,3 +2,5 @@
 .ipynb_checkpoints
 .pytest_cache
 ignore/*
+*.png
+*.jpg
