@@ -28,7 +28,7 @@ class AerialBatch(ImagesBatch):
             Format of an image.
         """
         _ = dst
-        path = self._make_path(ix, src).split('_')[0] + '_mask.png'
+        path = '_'.join(self._make_path(ix, src).split('_')[:-1]) + '_mask.png'
         return PIL.Image.open(path)
 
     @action
