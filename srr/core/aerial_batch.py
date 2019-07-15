@@ -1,4 +1,4 @@
-""" Batch for analysis of images and LiDAR data from UAVs """
+""" Batch for analysis of images from UAVs """
 
 import numpy as np
 import PIL
@@ -35,9 +35,6 @@ class AerialBatch(ImagesBatch):
     def load(self, *args, src=None, fmt=None, dst=None, **kwargs):
         """ Load data.
 
-        .. note:: if `fmt='images' or 'png'` than ``components`` must be a single component (str).
-        .. note:: All parameters must be named only.
-
         Parameters
         ----------
         src : str, None
@@ -56,6 +53,11 @@ class AerialBatch(ImagesBatch):
     @action
     def _make_crops_(self, image, size):
         """Crop patches from original image and combine them into array.
+        
+        Parameters
+        ----------
+        size : tuple on ints
+            Size of the resulting crops.
         """
         crops = []
         imsize = image.size
@@ -73,6 +75,10 @@ class AerialBatch(ImagesBatch):
     @action
     def unstack_crops(self):
         """Split crops from one image into separate images within new batch.
+        
+        Note
+        ----
+        This action rebuilds index.
         """
         images = np.array([crop for img in self.images for crop in img] + [None])[:-1]
         index = DatasetIndex(np.arange(len(images)))
@@ -81,8 +87,5 @@ class AerialBatch(ImagesBatch):
 
         masks = np.array([crop for img in self.masks for crop in img] + [None])[:-1]
         batch.masks = masks
-
-        batch.orig_images = self.orig_images
-        batch.orig_masks = self.orig_masks
 
         return batch
