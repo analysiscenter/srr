@@ -53,7 +53,7 @@ class AerialBatch(ImagesBatch):
     @action
     def _make_crops_(self, image, size):
         """Crop patches from original image and combine them into array.
-        
+
         Parameters
         ----------
         size : tuple on ints
@@ -75,7 +75,7 @@ class AerialBatch(ImagesBatch):
     @action
     def unstack_crops(self):
         """Split crops from one image into separate images within new batch.
-        
+
         Note
         ----
         This action rebuilds index.

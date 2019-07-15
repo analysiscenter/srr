@@ -77,18 +77,18 @@ def ce_dice_loss(labels, logits, alpha=0.75, *args, **kwargs):
 
     return loss
 
-def plot_img_pred_mask(img, pred, mask, print_forest_shares=False, figsize=(30,40)):
+def plot_img_pred_mask(img, pred, mask, print_forest_shares=False, figsize=(30, 40)):
     """Displays image, prediction and mask.
-    
+
     If print_forest_shares is True, prints shares of forest on pred and on mask.
     Share of forest on pred is calculated with .5 threshold.
     """
-    
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=figsize, sharey=True)
+
+    _, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=figsize, sharey=True)
     ax1.imshow(img)
-    ax1.set_title('Изображение',size=16)
+    ax1.set_title('Изображение', size=16)
     ax2.imshow(pred)
-    ax2.set_title('Прогноз',size=16)
+    ax2.set_title('Прогноз', size=16)
     ax3.imshow(mask, vmin=0, vmax=1)
     ax3.set_title('Маска', size=16)
     plt.show()
