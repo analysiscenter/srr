@@ -86,12 +86,12 @@ def plot_img_pred_mask(img, pred, mask, print_forest_shares=False, figsize=(30, 
 
     _, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=figsize, sharey=True)
     ax1.imshow(img)
-    ax1.set_title('Изображение', size=16)
+    ax1.set_title('Image', size=16)
     ax2.imshow(pred)
-    ax2.set_title('Прогноз', size=16)
+    ax2.set_title('Prediction', size=16)
     ax3.imshow(mask, vmin=0, vmax=1)
-    ax3.set_title('Маска', size=16)
+    ax3.set_title('Mask', size=16)
     plt.show()
     if print_forest_shares:
-        print("Доля леса на изображении: прогноз - {:.2f}%, разметка - {:.2f}%"
+        print("Percentage of forest cover: predicted - {:.2f}%, ground truth - {:.2f}%"
               "".format((np.sum(pred > 0.5) / pred.size) * 100, np.sum(mask) / mask.size * 100))
