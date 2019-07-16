@@ -68,7 +68,7 @@ class AerialBatch(ImagesBatch):
         for y in range(y_times):
             for x in range(x_times):
                 origin = (x*size[0], y*size[1])
-                right_bottom = tuple(map(sum, zip(origin, size)))
+                right_bottom = (left_top[0] + size[0], left_top[1] + size[1])
                 crops.append(image.crop((*origin, *right_bottom)))
 
         return np.array(crops + [None])[:-1]
