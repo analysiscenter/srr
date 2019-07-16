@@ -7,7 +7,7 @@ from ..batchflow.batchflow.models.tf.losses import dice, softmax_cross_entropy
 
 
 def get_origs(mask, classes, crop_shape=(128, 128), proba=0.5, seed=None):
-    """Function that find non-zero mask points, ramdomly choses one
+    """Function that finds non-zero mask points, randomly chooses one
     and returns coordinated of the crop with center at that point.
     """
     background_shape = mask.size
