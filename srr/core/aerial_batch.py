@@ -14,18 +14,14 @@ class AerialBatch(ImagesBatch):
 
     @inbatch_parallel(init='indices', post='_assemble')
     def _load_mask(self, ix, src=None, dst='masks'):
-        """Loads masks
+        """Load masks.
 
         Parameters
         ----------
         src : str, dataset.FilesIndex, None
-            Path to the folder with an image. Mask path is inferred from
-            image name. E.g. mask name '121_maks.png' is supposed to be
-            a mask for '121_sat.png' image. Mask should in png format.
+            Path to the folder with an image.
         dst : str
             Component to write images to.
-        fmt : str
-            Format of an image.
         """
         _ = dst
         path = '_'.join(self._make_path(ix, src).split('_')[:-1]) + '_mask.png'
@@ -37,12 +33,17 @@ class AerialBatch(ImagesBatch):
 
         Parameters
         ----------
-        src : str, None
+        src : str, dataset.FilesIndex, None
             Path to the folder with data. If src is None then path is determined from the index.
         fmt : {'image', 'blosc', 'csv', 'hdf5', 'feather', 'mask'}
             Format of the file to download.
         components : str, sequence
             components to download.
+            
+        Notes
+        -----
+        Mask path is inferred from image name. E.g. mask name '121_mask.png' is supposed to be
+        a mask for '121_sat.png' image. Masks should be in png format.
         """
         if fmt == 'image':
             return self._load_image(src, fmt=fmt, dst=dst)
