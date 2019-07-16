@@ -57,7 +57,7 @@ class AerialBatch(ImagesBatch):
 
         Parameters
         ----------
-        size : tuple on ints
+        size : tuple of ints
             Size of the resulting crops.
         """
         crops = []
