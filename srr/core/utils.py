@@ -34,7 +34,7 @@ def make_mask(mask, classes):
     Parameters
     ----------
     mask : ndarray
-        (x, y) or (x, y, 1) array with inters representing pixel classes.
+        (x, y) or (x, y, 1) array of ints, representing pixel classes.
     classes: tuple of integers > 0
         Classes from source mask to be included in resulting mask. Zero is reserved for background.
 
