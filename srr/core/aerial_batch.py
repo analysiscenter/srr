@@ -52,26 +52,30 @@ class AerialBatch(ImagesBatch):
         return super().load(src=src, fmt=fmt, dst=dst, *args, **kwargs)
 
     @action
-    def _make_crops_(self, image, size):
+    def _make_crops_(self, image, shape):
         """Crop patches from original image and combine them into array.
+
+        This action should be applied to instances of `PIL.Image.Image` class.
 
         Parameters
         ----------
-        size : tuple of ints
-            Size of the resulting crops.
+        shape : tuple of ints
+            shape of the resulting crops.
         """
+        if not (isinstance(shape, tuple) and len(shape) == 2):
+            raise ValueError("shape should be a tuple of size 2")
         crops = []
         imsize = image.size
-        x_times = np.ceil(imsize[0] / size[0]).astype(int)
-        y_times = np.ceil(imsize[1] / size[1]).astype(int)
+        x_times = np.ceil(imsize[0] / shape[0]).astype(int)
+        y_times = np.ceil(imsize[1] / shape[1]).astype(int)
 
         for y in range(y_times):
             for x in range(x_times):
-                origin = (x*size[0], y*size[1])
-                right_bottom = (left_top[0] + size[0], left_top[1] + size[1])
-                crops.append(image.crop((*origin, *right_bottom)))
+                left_top = (x*size[0], y*size[1])
+                right_bottom = (left_top[0] + shape[0], left_top[1] + shape[1])
+                crops.append(image.crop((*top_left, *right_bottom)))
 
-        return np.array(crops + [None])[:-1]
+        return np.array(crops, dtype=object)
 
     @action
     def unstack_crops(self):
@@ -79,14 +83,15 @@ class AerialBatch(ImagesBatch):
 
         Note
         ----
-        This action rebuilds index.
+        This action rebuilds index and keeps only `images` and `masks` components.
         """
-        images = np.array([crop for img in self.images for crop in img] + [None])[:-1]
+        images = np.array([crop for img in self.images for crop in img], dtype=object)
         index = DatasetIndex(np.arange(len(images)))
         batch = type(self)(index)
         batch.images = images
-
-        masks = np.array([crop for img in self.masks for crop in img] + [None])[:-1]
-        batch.masks = masks
+        
+        if 'masks' in self.components:
+            masks = np.array([crop for img in self.masks for crop in img], dtype=object)
+            batch.masks = masks
 
         return batch
