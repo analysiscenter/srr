@@ -78,7 +78,7 @@ def stack_crops(crops, n_hor, n_ver):
     return np.vstack([np.hstack(crops[i*n_hor:(i+1)*n_hor]) for i in range(n_ver)])
 
 def gather_img_mask_pred(batch, original_size, crop_shape):
-    """ Gathers images from crops of `images`, `masks` and `predictions` components of 
+    """ Gathers images from crops of `images`, `masks` and `predictions` components of
     `batch`.
 
     Notes
