@@ -9,7 +9,7 @@ from ..batchflow.batchflow.models.tf.losses import dice, softmax_cross_entropy
 def get_origins(mask, classes, crop_shape=(128, 128), proba=0.5, seed=None):
     """Calculates coordinates of top left corner of cropping box.
 
-    With probability `proba` finds all pixels with values from `classes`, samples one 
+    With probability `proba` finds all pixels with values from `classes`, samples one
     of them and returns top left corner coordinates of the crop with center at that point.
     With probability 1 - `proba` samples top left corner coordinates of cropping box
     randomly.
@@ -72,23 +72,24 @@ def make_mask(mask, classes):
 
 def stack_crops(crops, n_hor, n_ver):
     """Gathers an image from n_hor * n_ver ndarrays.
-    
+
     Performs `n_ver` horizontal stacks of `n_hor` crops, then stacks all of them vertically.
     """
     return np.vstack([np.hstack(crops[i*n_hor:(i+1)*n_hor]) for i in range(n_ver)])
 
-def gather_image(batch, original_size, crop_shape):
-    """ Gathers image from crops.
+def gather_img_mask_pred(batch, original_size, crop_shape):
+    """ Gathers images from crops of `images`, `masks` and `predictions` components of 
+    `batch`.
 
     Notes
     -----
-    Works only with batches of size 1.
+    Works only with batches of size 1. All three components should be present in batch.
     """
     n_hor, n_ver = np.ceil(np.array(original_size) / crop_shape).astype(int)
-    img = stack_crops(batch.images)[:original_size[0], :original_size[1]]
-    mask = stack_crops(batch.masks)[:original_size[0], :original_size[1]]
-    pred = stack_crops(batch.predictions)[:original_size[0], :original_size[1]]
-    
+    img = stack_crops(batch.images, n_hor, n_ver)[:original_size[0], :original_size[1]]
+    mask = stack_crops(batch.masks, n_hor, n_ver)[:original_size[0], :original_size[1]]
+    pred = stack_crops(batch.predictions, n_hor, n_ver)[:original_size[0], :original_size[1]]
+
     return img, mask, pred
 
 def ce_dice_loss(labels, logits, alpha=0.75, *args, **kwargs):

@@ -39,7 +39,7 @@ class AerialBatch(ImagesBatch):
             Format of the file to download.
         components : str, sequence
             components to download.
-            
+
         Notes
         -----
         Mask path is inferred from image name. E.g. mask name '121_mask.png' is supposed to be
@@ -71,8 +71,8 @@ class AerialBatch(ImagesBatch):
 
         for y in range(y_times):
             for x in range(x_times):
-                left_top = (x*size[0], y*size[1])
-                right_bottom = (left_top[0] + shape[0], left_top[1] + shape[1])
+                top_left = (x*shape[0], y*shape[1])
+                right_bottom = (top_left[0] + shape[0], top_left[1] + shape[1])
                 crops.append(image.crop((*top_left, *right_bottom)))
 
         return np.array(crops, dtype=object)
@@ -89,7 +89,7 @@ class AerialBatch(ImagesBatch):
         index = DatasetIndex(np.arange(len(images)))
         batch = type(self)(index)
         batch.images = images
-        
+
         if 'masks' in self.components:
             masks = np.array([crop for img in self.masks for crop in img], dtype=object)
             batch.masks = masks
